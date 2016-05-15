@@ -74,7 +74,7 @@ def show_form():
         guanofile.save(fpath)
         result = validate(fpath)
         app.logger.debug(result)
-        return render_template('results.html', valid=result['valid'], guano_fields=result['guano_fields'], filename=result['filename'])
+        return render_template('results.html', **result)
 
     return render_template('upload_form.html', error=error, guanofile=guanofile)
 

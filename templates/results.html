@@ -11,14 +11,33 @@
     <p class="text-danger">File is <strong>not valid</strong> GUANO!</p>
   {% endif %}
 
-  <h2>GUANO Metadata Fields</h2>
-  <table class="table table-striped table-bordered">
-  {% for k,v in guano_fields.items() %}
-    <tr>
-      <td><strong>{{ k }}</strong></td>
-      <td>{{ v }}</td>
-    </tr>
-  {% endfor %}
-  </table>
+  {% if errors %}
+    <div>
+      <h3>Errors</h3>
+      {% for k,v in errors.items() %}
+        <div class="text-danger">{{ k }}: {{ v }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  {% if warnings %}
+    <div>
+      <h3>Warnings</h3>
+      {% for k,v in warnings.items() %}
+        <div class="text-warning">{{ k }}: {{ v }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if guano_fields %}
+    <h2>GUANO Metadata Fields</h2>
+    <table class="table table-striped table-bordered">
+    {% for k,v in guano_fields.items() %}
+      <tr>
+        <td><strong>{{ k }}</strong></td>
+        <td>{{ v }}</td>
+      </tr>
+    {% endfor %}
+    </table>
+  {% endif %}
 
 {% endblock %}
