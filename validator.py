@@ -7,8 +7,10 @@ import guano
 
 import os.path
 
+__version__ = '0.0.1'
 
-MAX_FILE_SIZE_MB = 16
+
+MAX_FILE_SIZE_MB = 24
 UPLOAD_FOLDER = '/tmp'
 
 
@@ -18,6 +20,12 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE_MB * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
+@app.context_processor
+def inject_versions():
+    """Make global app config info available to templates"""
+    return {'guano_version': guano.__version__, 'validator_version': __version__}
+
+
 def validate(f):
     """
     Validate a (presumably) GUANO file.
@@ -25,13 +33,14 @@ def validate(f):
 
     {
       'guano': boolean,
-      'valid: boolean,
+      'valid': boolean,
+      'filename': string,
       'guano_fields': {key:value, ...},
       'errors': {key:value, ...},
       'warnings': {key:value, ...},
     }
     """
-    res = {'guano':False, 'valid':False, 'guano_fields':{}, 'errors':{}, 'warnings':{}}
+    res = {'guano':False, 'valid':False, 'filename':os.path.basename(f), 'guano_fields':{}, 'errors':{}, 'warnings':{}}
     try:
         g = guano.GuanoFile(f)
     except Exception, e:
@@ -39,8 +48,14 @@ def validate(f):
         return res
 
     res['guano_fields'] = {k:v for k,v in g.items()}
-    res['guano'] = True
-    res['valid'] = True
+    if 'Guano|Version' in g:
+        res['guano'] = True
+
+    if g.get('Guano|Version', 0.0) >= 1.0:
+        res['valid'] = True
+
+    # TODO: perform some lower-level validation of metadata
+
     return res
 
 
@@ -50,16 +65,16 @@ def show_form():
     if request.method == 'POST':
         print request.files
         guanofile = request.files.get('guanofile', None)
-        if not guanofile:
+        if not guanofile or not guanofile.filename:
             error = 'Please browse to or drag-and-drop a GUANO file for validation.'
-        # TODO: parse, validate, pass in validation struct
+            return render_template('upload_form.html', error=error)
         fname = secure_filename(guanofile.filename)
         fpath = os.path.join(app.config['UPLOAD_FOLDER'], fname)
         guanofile.save(fpath)
         result = validate(fpath)
         app.logger.debug(result)
-        return render_template('results.html', valid=result['valid'], guano_fields=result['guano_fields'])
-        # TODO: v2: parse, validate, persist validation struct, redirect(url_for('show_file'))
+        return render_template('results.html', valid=result['valid'], guano_fields=result['guano_fields'], filename=result['filename'])
+
     return render_template('upload_form.html', error=error, guanofile=guanofile)
 
 

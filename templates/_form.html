@@ -1,0 +1,14 @@
+<h1>GUANO Metadata Web Validator</h1>
+
+<p>This form validates bat acoustic recordings for compliance with the <a href="https://github.com/riggsd/guano-py/blob/master/doc/guano_specification.md">GUANO 1.0 metadata specification</a>.</p>
+
+{% if error %}
+  <p class="text-danger"><strong>Error:</strong> {{ error }}</p>
+{% endif %}
+
+<form name="validator" method="post" action="/" enctype="multipart/form-data" role="form">
+  <div class="form-group">
+    <input type="file" name="guanofile" class="form-control">
+  </div>
+  <input type="submit" value="Validate!" class="btn btn-default">
+</form>
