@@ -1,11 +1,12 @@
 #!/usr/bin/env python2
 
+import os.path
+from collections import OrderedDict
+
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
 from werkzeug import secure_filename
 
 import guano
-
-import os.path
 
 __version__ = '0.0.1'
 
@@ -47,11 +48,11 @@ def validate(f):
         res['errors'][1] = str(e)
         return res
 
-    res['guano_fields'] = {k:v for k,v in g.items()}
-    if 'Guano|Version' in g:
+    res['guano_fields'] = OrderedDict(g.items())
+    if 'GUANO|Version' in g:
         res['guano'] = True
 
-    if g.get('Guano|Version', 0.0) >= 1.0:
+    if g.get('GUANO|Version', 0.0) >= 1.0:
         res['valid'] = True
 
     # TODO: perform some lower-level validation of metadata
